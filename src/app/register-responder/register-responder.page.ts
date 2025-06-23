@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { UserService } from '../services/user.service';
 
 @Component({
   standalone: false,
@@ -7,22 +7,35 @@ import { Router } from '@angular/router';
   templateUrl: './register-responder.page.html',
   styleUrls: ['./register-responder.page.scss'],
 })
-export class RegisterResponderPage implements OnInit {
+export class RegisterResponderPage {
   name: string = '';
   phone: string = '';
   password: string = '';
   confirmPassword: string = '';
+  responderType: string = 'Police';
+  badgeId: string = '';
+  organization: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private userService: UserService) {}
 
-  ngOnInit() {
-  }
-
-  register() {
-    if (this.password === this.confirmPassword) {
-      // Simulate success
-      this.router.navigate(['/dashboard']);
+  async register() {
+    if (this.password !== this.confirmPassword) {
+      await this.userService.showAlert('Error', 'Passwords do not match');
+      return;
     }
-  }
 
+    if (!this.name || !this.phone || !this.password || !this.responderType) {
+      await this.userService.showAlert('Error', 'Please fill all required fields');
+      return;
+    }
+
+    await this.userService.registerResponder(
+      this.name,
+      this.phone,
+      this.password,
+      this.responderType,
+      this.badgeId,
+      this.organization
+    );
+  }
 }

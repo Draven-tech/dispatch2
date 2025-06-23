@@ -1,30 +1,55 @@
 <ion-content class="register-bg">
   <div class="container">
-    <img src="assets/logo.png" alt="EMSCall Logo" class="logo" />
-    <h2>Create Account</h2>
+    <img src="assets/logo.png" alt="DISPATCH Logo" class="logo" />
+    <h2>Responder Registration</h2>
 
     <ion-item>
-      <ion-label position="floating">Full Name</ion-label>
-      <ion-input type="text" [(ngModel)]="name" autocomplete="name"></ion-input>
+      <ion-label position="floating">Full Name *</ion-label>
+      <ion-input type="text" [(ngModel)]="name" required></ion-input>
     </ion-item>
 
     <ion-item>
-      <ion-label position="floating">Phone Number</ion-label>
-      <ion-input type="tel" [(ngModel)]="phone" inputmode="tel" autocomplete="tel"></ion-input>
+      <ion-label position="floating">Phone Number *</ion-label>
+      <ion-input type="tel" [(ngModel)]="phone" required></ion-input>
     </ion-item>
 
     <ion-item>
-      <ion-label position="floating">Password</ion-label>
-      <ion-input type="password" [(ngModel)]="password" autocomplete="new-password"></ion-input>
+      <ion-label position="floating">Responder Type *</ion-label>
+      <ion-select [(ngModel)]="responderType" interface="popover">
+        <ion-select-option value="Police">Police Officer</ion-select-option>
+        <ion-select-option value="Firefighter">Firefighter</ion-select-option>
+        <ion-select-option value="Paramedic">Paramedic/EMT</ion-select-option>
+        <ion-select-option value="Traffic Control (CITOM)">Traffic Control (CITOM)</ion-select-option>
+        <ion-select-option value="Dispatcher">Dispatcher</ion-select-option>
+      </ion-select>
     </ion-item>
 
     <ion-item>
-      <ion-label position="floating">Confirm Password</ion-label>
-      <ion-input type="password" [(ngModel)]="confirmPassword" autocomplete="new-password"></ion-input>
+      <ion-label position="floating">Badge/ID Number</ion-label>
+      <ion-input type="text" [(ngModel)]="badgeId"></ion-input>
     </ion-item>
 
-    <ion-button expand="block" (click)="register()" class="register-btn">Create Account</ion-button>
+    <ion-item>
+      <ion-label position="floating">Organization</ion-label>
+      <ion-input type="text" [(ngModel)]="organization"></ion-input>
+    </ion-item>
 
-    <p class="login-link">Already have an account? <a routerLink="/login-responder">Login</a></p>
+    <ion-item>
+      <ion-label position="floating">Password *</ion-label>
+      <ion-input type="password" [(ngModel)]="password" required></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Confirm Password *</ion-label>
+      <ion-input type="password" [(ngModel)]="confirmPassword" required></ion-input>
+    </ion-item>
+
+    <ion-button expand="block" (click)="register()" class="register-btn">
+      Register as Responder
+    </ion-button>
+
+    <p class="login-link">
+      Already have an account? <a routerLink="/login-responder">Login</a>
+    </p>
   </div>
 </ion-content>

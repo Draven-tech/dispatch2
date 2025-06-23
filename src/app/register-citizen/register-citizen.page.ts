@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { UserService } from '../services/user.service';
 
 @Component({
   standalone: false,
@@ -7,22 +7,19 @@ import { Router } from '@angular/router';
   templateUrl: './register-citizen.page.html',
   styleUrls: ['./register-citizen.page.scss'],
 })
-export class RegisterCitizenPage implements OnInit {
+export class RegisterCitizenPage {
   name: string = '';
   phone: string = '';
   password: string = '';
   confirmPassword: string = '';
 
-  constructor(private router: Router) {}
-
-  ngOnInit() {
-  }
+  constructor(private userService: UserService) {}
 
   register() {
-    if (this.password === this.confirmPassword) {
-      // Simulate success
-      this.router.navigate(['/dashboard']);
+    if (this.password !== this.confirmPassword) {
+      this.userService.showAlert('Error', 'Passwords do not match');
+      return;
     }
+    this.userService.registerCitizen(this.name, this.phone, this.password);
   }
-
 }

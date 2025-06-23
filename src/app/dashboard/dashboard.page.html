@@ -1,6 +1,8 @@
 <ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>DISPATCH Dashboard</ion-title>
+  <ion-toolbar [color]="responderType === 'Police' ? 'primary' : 
+                responderType === 'Firefighter' ? 'danger' : 
+                responderType === 'Paramedic' ? 'tertiary' : 'medium'">
+    <ion-title>{{ getDashboardTitle() }}</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="logout()">
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
@@ -10,48 +12,72 @@
 </ion-header>
 
 <ion-content class="dashboard-bg">
-  <h2>Welcome to DISPATCH</h2>
-  <p>Quickly connect with emergency services</p>
+  <h2>{{ getWelcomeMessage() }}</h2>
+  
+  <div *ngIf="isResponder">
+    <!-- Responder-specific controls -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Responder Controls</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>Duty Status</ion-label>
+          <ion-toggle [(ngModel)]="currentUser.available"></ion-toggle>
+        </ion-item>
+        <ion-button expand="block" color="success">
+          Mark Available
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
-  <ion-grid>
-    <ion-row>
-      <ion-col size="12" size-md="6">
-        <ion-button expand="block" color="danger" class="emergency-btn">
-          <ion-icon name="alert-circle" slot="start"></ion-icon>
-          Police Emergency
-        </ion-button>
-      </ion-col>
-      <ion-col size="12" size-md="6">
-        <ion-button expand="block" color="warning" class="emergency-btn">
-          <ion-icon name="flame" slot="start"></ion-icon>
-          Fire Department
-        </ion-button>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col size="12" size-md="6">
-        <ion-button expand="block" color="tertiary" class="emergency-btn">
-          <ion-icon name="medkit" slot="start"></ion-icon>
-          Medical Emergency
-        </ion-button>
-      </ion-col>
-      <ion-col size="12" size-md="6">
-        <ion-button expand="block" color="medium" class="emergency-btn">
-          <ion-icon name="construct" slot="start"></ion-icon>
-          Traffic Control
-        </ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <div *ngIf="!isResponder">
+    <!-- Citizen emergency buttons -->
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          <ion-button expand="block" color="primary" class="emergency-btn">
+            <ion-icon name="shield" slot="start"></ion-icon>
+            Police Emergency
+          </ion-button>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <ion-button expand="block" color="danger" class="emergency-btn">
+            <ion-icon name="flame" slot="start"></ion-icon>
+            Fire Emergency
+          </ion-button>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          <ion-button expand="block" color="tertiary" class="emergency-btn">
+            <ion-icon name="medkit" slot="start"></ion-icon>
+            Medical Emergency
+          </ion-button>
+        </ion-col>
+        <ion-col size="12" size-md="6">
+          <ion-button expand="block" color="medium" class="emergency-btn">
+            <ion-icon name="trail-sign" slot="start"></ion-icon>
+            Traffic Emergency
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
 
-  <ion-card class="emergency-card">
+  <ion-card class="status-card" *ngIf="isResponder">
     <ion-card-header>
-      <ion-card-title>Emergency?</ion-card-title>
+      <ion-card-title>Quick Actions</ion-card-title>
     </ion-card-header>
     <ion-card-content>
-      <ion-button expand="block" color="danger" fill="outline" size="large" class="sos-btn">
-        <ion-icon name="alert" slot="start"></ion-icon>
-        SOS Emergency Call
+      <ion-button expand="block" color="warning">
+        <ion-icon name="alert-circle" slot="start"></ion-icon>
+        Report Incident
+      </ion-button>
+      <ion-button expand="block" color="secondary">
+        <ion-icon name="map" slot="start"></ion-icon>
+        View Active Calls
       </ion-button>
     </ion-card-content>
   </ion-card>

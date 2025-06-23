@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { UserService } from '../services/user.service';
+import { inject } from '@angular/core';
 
 @Component({
   standalone: false,
@@ -7,21 +8,16 @@ import { Router } from '@angular/router';
   templateUrl: './login-citizen.page.html',
   styleUrls: ['./login-citizen.page.scss'],
 })
-export class LoginCitizenPage implements OnInit {
-  phone: string = 'test';
-  password: string = 'test';
+export class LoginCitizenPage {
+  private userService = inject(UserService);
+  phone: string = '';
+  password: string = '';
 
-
-  constructor(private router: Router) {}
-
-  ngOnInit() {
-  }
 
   login() {
-    // Dummy login
-    if (this.phone && this.password) {
-      this.router.navigate(['/dashboard']);
+    if (!this.phone || !this.password) {
+      return;
     }
+    this.userService.login(this.phone, this.password);
   }
-
 }
