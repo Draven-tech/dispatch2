@@ -1,38 +1,68 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
+import { Firestore, doc, setDoc, serverTimestamp } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
   constructor(
+    private auth: Auth,
     private firestore: Firestore,
-    private router: Router
+    private router: Router,
+    private alertCtrl: AlertController
   ) {}
 
-  showAlert(header: string, message: string) {
-    console.warn(`${header}: ${message}`);
+  async showAlert(header: string, message: string) {
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 
+  // Convert phone to email format for Firebase Auth
+  private phoneToEmail(phone: string): string {
+    const cleanPhone = phone.replace(/\D/g, '');
+    return `${cleanPhone}@emscall.app`;
+  }
 
   // Citizen Registration
   async registerCitizen(name: string, phone: string, password: string) {
-    try {
-      const usersRef = collection(this.firestore, 'user-citizen');
-      await addDoc(usersRef, {
-        name,
-        phone,
-        password, // Remember to hash in production
-        emergencyContacts: [],
-        address: "",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-      this.router.navigate(['/dashboard']);
-    } catch (error) {
-      this.showAlert('Registration Failed', 'Please try again later.');
-      console.error(error);
-    }
+  // Add password length validation
+  if (password.length < 6) {
+    await this.showAlert('Error', 'Password must be at least 6 characters');
+    return false;
   }
+
+  try {
+    const email = this.phoneToEmail(phone);
+    console.log('Registering with:', { email, password: '***' }); // Debug log
+
+    const userCredential = await createUserWithEmailAndPassword(
+      this.auth, 
+      email, 
+      password
+    );
+
+    // Save to Firestore
+    await setDoc(doc(this.firestore, 'citizens', userCredential.user.uid), {
+      name,
+      phone,
+      emergencyContacts: [],
+      address: "",
+      createdAt: serverTimestamp()
+    });
+
+    this.router.navigate(['/dashboard']);
+    return true;
+  } catch (error) {
+    console.error('Full error:', error); // Detailed error log
+    await this.showAlert('Registration Failed', this.getErrorMessage(error));
+    return false;
+  }
+}
 
   // Responder Registration
   async registerResponder(
@@ -44,60 +74,75 @@ export class UserService {
     organization?: string
   ) {
     try {
-      const usersRef = collection(this.firestore, 'user-responder');
-      await addDoc(usersRef, {
+      const email = this.phoneToEmail(phone);
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      
+      await setDoc(doc(this.firestore, 'responders', userCredential.user.uid), {
         name,
         phone,
-        password,
         responderType,
         badgeId: badgeId || '',
         organization: organization || '',
         isOnDuty: false,
+        available: true,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        available: true
+        updatedAt: serverTimestamp()
       });
+      
       this.router.navigate(['/dashboard']);
+      return true;
     } catch (error) {
-      this.showAlert('Registration Failed', 'Please try again later.');
-      console.error(error);
+      this.showAlert('Registration Failed', this.getErrorMessage(error));
+      return false;
     }
   }
+  
 
   // Login
   async login(phone: string, password: string, isResponder: boolean = false) {
     try {
-      const collectionName = isResponder ? 'user-responder' : 'user-citizen';
-      const usersRef = collection(this.firestore, collectionName);
-      const q = query(usersRef, 
-        where('phone', '==', phone),
-        where('password', '==', password)
-      );
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        this.showAlert('Login Failed', 'Invalid credentials');
-        return false;
-      }
-
-      // Store user data in localStorage
-      const userData = querySnapshot.docs[0].data();
+      const email = this.phoneToEmail(phone);
+      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      
+      // Get additional user data from Firestore
+      const collectionName = isResponder ? 'responders' : 'citizens';
+      const userDoc = doc(this.firestore, collectionName, userCredential.user.uid);
+      
+      // Store minimal auth info
       localStorage.setItem('currentUser', JSON.stringify({
-        id: querySnapshot.docs[0].id,
-        ...userData
+        uid: userCredential.user.uid,
+        phone,
+        isResponder
       }));
-
+      
       this.router.navigate(['/dashboard']);
       return true;
     } catch (error) {
-      this.showAlert('Login Failed', 'An error occurred');
-      console.error(error);
+      this.showAlert('Login Failed', this.getErrorMessage(error));
       return false;
     }
   }
 
-  logout() {
+  async logout() {
+    await signOut(this.auth);
     localStorage.removeItem('currentUser');
-    this.router.navigate(['/login-responder']);
+    this.router.navigate(['/welcome']);
+  }
+
+  private getErrorMessage(error: any): string {
+    switch (error.code) {
+      case 'auth/email-already-in-use':
+        return 'This phone number is already registered';
+      case 'auth/invalid-email':
+        return 'Invalid phone number format';
+      case 'auth/weak-password':
+        return 'Password should be at least 6 characters';
+      case 'auth/user-not-found':
+        return 'User not found';
+      case 'auth/wrong-password':
+        return 'Incorrect password';
+      default:
+        return 'An error occurred. Please try again.';
+    }
   }
 }

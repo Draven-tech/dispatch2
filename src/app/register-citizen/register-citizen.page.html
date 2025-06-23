@@ -10,12 +10,12 @@
 
     <ion-item>
       <ion-label position="floating">Phone Number</ion-label>
-      <ion-input type="tel" [(ngModel)]="phone" inputmode="tel" autocomplete="tel"></ion-input>
+      <ion-input type="tel" [(ngModel)]="phone" required></ion-input>
     </ion-item>
 
     <ion-item>
       <ion-label position="floating">Password</ion-label>
-      <ion-input type="password" [(ngModel)]="password" autocomplete="new-password"></ion-input>
+      <ion-input type="password" [(ngModel)]="password" minlength="6" required></ion-input>
     </ion-item>
 
     <ion-item>
@@ -23,7 +23,7 @@
       <ion-input type="password" [(ngModel)]="confirmPassword" autocomplete="new-password"></ion-input>
     </ion-item>
 
-    <ion-button expand="block" (click)="register()" class="register-btn">Create Account</ion-button>
+    <ion-button expand="block" (click)="register()" class="register-btn" [disabled]="!phone || !password || password.length < 6">Create Account</ion-button>
 
     <p class="login-link">Already have an account? <a routerLink="/login-citizen">Login</a></p>
   </div>
