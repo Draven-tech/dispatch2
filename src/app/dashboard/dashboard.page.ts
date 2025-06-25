@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: false,
@@ -12,42 +13,43 @@ export class DashboardPage {
   isResponder = false;
   responderType = '';
 
-  constructor(private userService: UserService) {
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) {
+    this.loadUserData();
+  }
+
+  private loadUserData(): void {
     const userData = localStorage.getItem('currentUser');
     if (userData) {
       this.currentUser = JSON.parse(userData);
-      this.isResponder = this.currentUser.responderType !== undefined;
+      this.isResponder = this.currentUser.isResponder;
       this.responderType = this.currentUser.responderType || '';
+    } else {
+      this.router.navigate(['/login-citizen']);
     }
   }
 
-  logout() {
-    this.userService.logout();
+  async logout(): Promise<void> {
+    await this.userService.logout();
   }
 
   getWelcomeMessage(): string {
-    if (!this.currentUser) return 'Welcome';
-    
-    if (this.isResponder) {
-      return `Officer ${this.currentUser.name.split(' ')[0]}`;
-    }
-    return `Welcome back, ${this.currentUser.name.split(' ')[0]}`;
+    if (!this.currentUser?.name) return 'Welcome';
+    return this.isResponder 
+      ? `Officer ${this.currentUser.name.split(' ')[0]}`
+      : `Welcome back, ${this.currentUser.name.split(' ')[0]}`;
   }
 
   getDashboardTitle(): string {
     switch(this.responderType) {
-      case 'Police':
-        return 'POLICE Dispatch';
-      case 'Firefighter':
-        return 'FIRE DEPARTMENT Dashboard';
-      case 'Paramedic':
-        return 'EMS Dispatch';
-      case 'Traffic Control (CITOM)':
-        return 'TRAFFIC CONTROL Console';
-      case 'Dispatcher':
-        return 'DISPATCH Control Center';
-      default:
-        return 'DISPATCH Dashboard';
+      case 'Police': return 'POLICE Dispatch';
+      case 'Firefighter': return 'FIRE DEPARTMENT Dashboard';
+      case 'Paramedic': return 'EMS Dispatch';
+      case 'Traffic Control (CITOM)': return 'TRAFFIC CONTROL Console';
+      case 'Dispatcher': return 'DISPATCH Control Center';
+      default: return 'DISPATCH Dashboard';
     }
   }
 }

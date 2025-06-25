@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>My Profile</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <!-- Citizen Fields -->
+    <ion-item *ngIf="!isResponder">
+      <ion-label position="stacked">Name</ion-label>
+      <ion-input [(ngModel)]="profile.name"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Phone</ion-label>
+      <ion-input [(ngModel)]="profile.phone" type="tel"></ion-input>
+    </ion-item>
+
+    <!-- Responder Fields (only show if responder) -->
+    <ion-item *ngIf="isResponder">
+      <ion-label position="stacked">Badge ID</ion-label>
+      <ion-input [(ngModel)]="profile.badgeId"></ion-input>
+    </ion-item>
+
+    <ion-item *ngIf="isResponder">
+      <ion-label position="stacked">Organization</ion-label>
+      <ion-input [(ngModel)]="profile.organization"></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <div class="ion-padding">
+    <ion-button expand="block" (click)="saveProfile()">Save Changes</ion-button>
+    <ion-button expand="block" color="danger" (click)="deleteAccount()">
+      Delete Account
+    </ion-button>
+  </div>
+</ion-content>

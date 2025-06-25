@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: false,
@@ -13,13 +14,27 @@ export class RegisterCitizenPage {
   password: string = '';
   confirmPassword: string = '';
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) {}
 
-  register() {
+  async register(): Promise<void> {
     if (this.password !== this.confirmPassword) {
-      this.userService.showAlert('Error', 'Passwords do not match');
+      await this.userService.showAlert('Error', 'Passwords do not match');
       return;
     }
-    this.userService.registerCitizen(this.name, this.phone, this.password);
+
+    const success = await this.userService.registerCitizen(
+      this.name,
+      this.phone,
+      this.password
+    );
+
+    if (success) {
+      this.router.navigate(['/login-citizen']);
+    } else {
+      await this.userService.showAlert('Error', 'Registration failed. Please try again.');
+    }
   }
 }

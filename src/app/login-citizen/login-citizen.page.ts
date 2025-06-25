@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { UserService } from '../services/user.service';
-import { inject } from '@angular/core';
 
 @Component({
   standalone: false,
@@ -9,15 +8,16 @@ import { inject } from '@angular/core';
   styleUrls: ['./login-citizen.page.scss'],
 })
 export class LoginCitizenPage {
-  private userService = inject(UserService);
   phone: string = '';
   password: string = '';
 
+  constructor(private userService: UserService) {}
 
-  login() {
+  async login(): Promise<void> {
     if (!this.phone || !this.password) {
+      await this.userService.showAlert('Error', 'Please enter phone and password');
       return;
     }
-    this.userService.login(this.phone, this.password);
+    await this.userService.login(this.phone, this.password);
   }
 }

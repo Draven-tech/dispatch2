@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: false,
@@ -16,9 +17,12 @@ export class RegisterResponderPage {
   badgeId: string = '';
   organization: string = '';
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) {}
 
-  async register() {
+  async register(): Promise<void> {
     if (this.password !== this.confirmPassword) {
       await this.userService.showAlert('Error', 'Passwords do not match');
       return;
@@ -29,7 +33,7 @@ export class RegisterResponderPage {
       return;
     }
 
-    await this.userService.registerResponder(
+    const success = await this.userService.registerResponder(
       this.name,
       this.phone,
       this.password,
@@ -37,5 +41,11 @@ export class RegisterResponderPage {
       this.badgeId,
       this.organization
     );
+
+    if (success) {
+      this.router.navigate(['/login-responder']);
+    } else {
+      await this.userService.showAlert('Error', 'Registration failed. Please try again.');
+    }
   }
 }
